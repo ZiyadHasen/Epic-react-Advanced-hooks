@@ -4,17 +4,41 @@
 import * as React from 'react'
 // test
 
-function Counter({initialCount = 0, step = 1}) {
-  // 🐨 replace React.useState with React.useReducer.
-  // 💰 React.useReducer(countReducer, initialCount)
-  const [count, setCount] = React.useState(initialCount)
+function Counter({initialCount = 0, step = 3}) {
+  const reducer = (state, action) => {
+    switch (action.type) {
+      case 'add':
+        return {...state, count: state.count + action.step}
+      case 'sub':
+        return {...state, count: state.count - action.step}
+      default:
+        return state
+    }
+  }
 
-  // 💰 you can write the countReducer function so you don't have to make any
-  // changes to the next two lines of code! Remember:
-  // The 1st argument is called "state" - the current value of count
-  // The 2nd argument is called "newState" - the value passed to setCount
-  const increment = () => setCount(count + step)
-  return <button onClick={increment}>{count}</button>
+  const [state, dispatch] = React.useReducer(reducer, {count: initialCount})
+
+  return (
+    <div style={{padding: '4rem'}}>
+      <p> {state.count}</p>
+      <div style={{display: 'flex', gap: '2rem'}}>
+        <button
+          onClick={() => {
+            dispatch({type: 'add', step})
+          }}
+        >
+          increament
+        </button>
+        <button
+          onClick={() => {
+            dispatch({type: 'sub', step})
+          }}
+        >
+          deacrement
+        </button>
+      </div>
+    </div>
+  )
 }
 
 function App() {
