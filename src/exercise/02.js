@@ -10,7 +10,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-// generic function our useReducer use 
+// generic function our useReducer use
 function asyncReducer(state, action) {
   switch (action.type) {
     case 'pending': {
@@ -28,15 +28,7 @@ function asyncReducer(state, action) {
   }
 }
 
-// we passed three things , 
-// 1, asyncCallback which return promise , the function define on parent and called in the custom hook 
-// and return promise or null and we handed what returned in the custom hook 
-// 2, we are also passing dependencies , interesting why we just dont make the asyncCallback as dependecie
-// because in each render the function definition has a different reference so it is different 
-// we only want to triggere the effect when the name change so we just passed that from the parent easy 
-// 3, innitial state is innitial state for the useReducer 
-
-function useAsync(asyncCallback, initialState, dependencies) {
+function useAsync(asyncCallback, initialState) {
   const [state, dispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
@@ -45,7 +37,6 @@ function useAsync(asyncCallback, initialState, dependencies) {
   })
 
   React.useEffect(() => {
-    // 💰 this first early-exit bit is a little tricky,
     const promise = asyncCallback()
     if (!promise) return
 
@@ -55,29 +46,30 @@ function useAsync(asyncCallback, initialState, dependencies) {
       data => dispatch({type: 'resolved', data}),
       error => dispatch({type: 'rejected', error}),
     )
-  }, dependencies)
+  }, [asyncCallback])
 
   return state
 }
 
 function PokemonInfo({pokemonName}) {
-  // 🐨 here's how you'll use the new useAsync hook you're writing:
-  const state = useAsync(
-    () => {
-      if (!pokemonName) {
-        return
-      }
-      return fetchPokemon(pokemonName)
-    },
-    {
-      status: pokemonName ? 'pending' : 'idle',
-      data: null,
-      error: null,
-    },
-    [pokemonName],
-  )
+  // useAsync just runs useEffect when asyncCallback identity changes
 
- 
+  // That identity only changes when pokemonName changes (because of useCallback)
+
+  // You don’t need to pass dependencies into useAsync at all
+  
+  const asyncCallback = React.useCallback(() => {
+    if (!pokemonName) {
+      return
+    }
+    return fetchPokemon(pokemonName)
+  }, [pokemonName])
+
+  const state = useAsync(asyncCallback, {
+    status: pokemonName ? 'pending' : 'idle',
+    data: null,
+    error: null,
+  })
 
   const {data, status, error} = state
 
