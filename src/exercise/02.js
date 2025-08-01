@@ -1,6 +1,14 @@
 // useCallback: custom hooks
 // http://localhost:3000/isolated/exercise/02.js
 
+// The useCallback example shown in the exercise is a good use case — in theory.
+// But it’s only this complex to help you learn what useCallback is for.
+// In real apps, you don’t usually need to extract functions from useEffect just to memoize them.
+
+// Instead, write your async logic directly inside useEffect, and only memoize if the function 
+// needs to be stable across renders for a reason.
+  
+
 import * as React from 'react'
 import {
   fetchPokemon,
